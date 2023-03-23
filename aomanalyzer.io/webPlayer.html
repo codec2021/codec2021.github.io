@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Visionular web player</title>
+</head>
+
+<body>
+
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'sidebyside')">Side by side</button>
+    <button class="tablinks" onclick="openTab(event, 'slide')">Slide</button>
+    <button class="tablinks" onclick="openTab(event, 'help')">Help</button>
+  </div>
+
+  <!-- side by side -->
+  <div id="sidebyside" class="tabcontent">
+    <div style="text-align:center">
+      <br><br>
+      <video id="video1" width="720" onplay="playV(video2)" onpause="pauseV(video2)" controls style="vertical-align:left;">
+        Your browser does not support the video tag.
+      </video>
+      <video id="video2" width="720" onplay="playV(video1)" onpause="pauseV(video1)" controls style="vertical-align:right;">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <div class="it_maind">
+      <font color=#AAAAAA>
+        <p>Control:
+          <button onclick="playPause(video1, video2)">Play/Pause</button>
+          <button onclick="stop(video1, video2)">Stop</button>
+          <button onclick="makeRes(video1, video2, 1080)">1080</button>
+          <button onclick="makeRes(video1, video2, 720)">720</button>
+          <button onclick="makeRes(video1, video2, 540)">540</button>
+          <button onclick="makeRes(video1, video2, 0)">origin</button>
+        </p>
+        <p>VideoA: <input id="v_file" type="file" onchange="playFile('v_file', 'video1')"> <span id="video1_size" /> </span>
+          <span>  <- vs ->  </span>
+          VideoB: <input id="v_file2" type="file" onchange="playFile('v_file2', 'video2')"> <span id="video2_size"> </span></p>
+        <p> Time:
+          <input id="time_value" type="value"> sec <button onclick="setTime(video1, video2, 'time_value')">Set Time</button>
+        </p>
+        <p> Player width:
+          <input id="player_value" type="value"> px <button onclick="setRes(video1, video2)">Set Resolution</button>
+        </p>
+      </font>
+    </div>
+  </div>
+  <!-- slide -->
+  <!-- ref: https://codemyui.com/video-comparison-slider-animation-using-html5 -->
+  <div id="slide" class="tabcontent">
+    <p style="text-align:center" >
+      VideoA: <input id="v_file3" type="file" onchange="playFile('v_file3', 'video3')"> <span id="video3_size"/> </span>
+    <span>   <- vs ->  </span>
+      VideoB: <input id="v_file4" type="file" onchange="playFile('v_file4', 'video4')"> <span id="video4_size"> </span></p>
+    <div id="video-compare-container" >
+      <video id="video4" onplay="playV(video3)" onpause="pauseV(video3)"></video>
+      <div id="video-clipper">
+        <video id="video3" onplay="playV(video4)" onpause="pauseV(video4)"></video>
+      </div>
+    </div>
+
+    <div>
+      <font color=#AAAAAA>
+        <p style="text-align:center" >Control
+          <button onclick="playPause(video3, video4)">Play/Pause</button>
+          <button onclick="stop(video3, video4)">Stop</button>
+          <button onclick="fitWindow()">Enlarge</button>
+          <button onclick="makeResA()">Left Size</button>
+          <button onclick="makeResB()">Right Size</button>
+          Time:
+          <input id="time_value2" type="value"/> sec 
+          <button onclick="setTime(video3, video4, 'time_value2')">Set Time</button>
+          <button id="videoonly" onclick="onVideoOnly()">video only</button>
+        </p>
+      </font>
+    </div>
+  </div>
+  <div id="help" class="tabcontent">
+    <p>URL arguments:</p>
+    <p>mode: sbs / slide </p>
+    <p>videoA: url for the video load to left </p>
+    <p>VideoB: url for the video load to right  </p>
+    <p>Example1:  https://pengbins.github.io/aomanalyzer.io/webPlayer.html?mode=sbs&VideoA=https://demo.visionular.cn/videos/av1/Tears_of_Steal-4k-1920-3min.mov-55-8-out.mp4&VideoB=https://demo.visionular.cn/videos/av1/Tears_of_Steal-4k-1920-3min.mov-50-8-out.mp4</p>
+    <p>Example2:  https://pengbins.github.io/aomanalyzer.io/webPlayer.html?mode=slide&VideoA=https://demo.visionular.cn/videos/av1/Tears_of_Steal-4k-1920-3min.mov-55-8-out.mp4&VideoB=https://demo.visionular.cn/videos/av1/Tears_of_Steal-4k-1920-3min.mov-50-8-out.mp4</p>
+  </div>
+  <div style="text-align: center" > Powered by <a href="mailto:sandychuangster@gmail.com">Sandy Chuang</a> <a href="https://github.com/pengbins/aomanalyzer.io/blob/master/webPlayer.html">Code</a>  </div>
+  <!-- set border -->
+  <style>
+    html {
+      overflow: -moz-scrollbars-vertical; 
+      overflow-y: scroll;
+    }
+    body {
+      background: #FDF5E6;
+      margin: 1rem;
+    }
+
+    #video-compare-container {
+      display: inline-block;
+      line-height: 0;
+      position: relative;
+      width: 100%;
+      padding-top: 42.3%;
+      left: 50%;
+      transform: translate(-50%,0);
+    }
+
+    #video-compare-container>video {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      height: 100%;
+    }
+
+    #video-clipper {
+      width: 50%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      overflow: hidden;
+      border-right-style: solid;
+      border-color: #FFFAFA;
+      border-width: 1px
+    }
+
+    #video-clipper video {
+      width: 200%;
+      postion: absolute;
+      height: 100%;
+    }
+
+    /* Style the tab */
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+
+    /* Style the buttons inside the tab */
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 6px 16px;
+      transition: 0.3s;
+      font-size: 17px;
+    }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+      background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+      background-color: #ccc;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+  </style>
+
+  <script>
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+    // Slide window
+    function trackLocation(e) {
+      var rect = videoContainer.getBoundingClientRect(),
+        position = ((e.pageX - rect.left) / videoContainer.offsetWidth) * 100;
+      if (position <= 92 && position >= 8) {
+        videoClipper.style.width = position + "%";
+        clippedVideo.style.width = ((100 / position) * 100) + "%";
+        clippedVideo.style.zIndex = 3;
+      }
+    }
+    var videoContainer = document.getElementById("video-compare-container"),
+      videoClipper = document.getElementById("video-clipper"),
+      clippedVideo = videoClipper.getElementsByTagName("video")[0];
+    videoContainer.addEventListener("mousemove", trackLocation, false);
+    videoContainer.addEventListener("touchstart", trackLocation, false);
+    videoContainer.addEventListener("touchmove", trackLocation, false);
+    var videoRatio = {"video3":"100%", "video4": "100%" };
+
+    function onVideoOnly() {
+      videoonly = !videoonly;
+      var btn = document.getElementById("videoonly")
+      btn.innerHTML = videoonly ? "with audio" : "video only";
+      playFile('v_file3', 'video3')
+      playFile('v_file4', 'video4')
+    }
+
+    // Player controller
+    function playURL(url, tag){
+      console.log(url);
+      var v = document.getElementById(tag)
+      v.src = url;
+      v.addEventListener("loadedmetadata", function (e) {
+        var width = this.videoWidth,
+          height = this.videoHeight;
+        var sz = document.getElementById( tag +"_size" )
+        sz.innerHTML = width.toString() + "x" + height.toString();
+        
+        var winWidth = videoContainer.offsetWidth;
+        var ratio = (width * 100 / winWidth);
+        ratio = ratio > 100 ? 100 : ratio;
+        videoRatio[tag] = ratio.toFixed(0) + "%";
+        console.log("v: ", width, height, tag, winWidth, videoRatio[tag] );
+      }, false);
+      v.addEventListener("error", function (e) {
+        v.poster = url;
+      }, true);
+    }
+
+    function playIVF(id, tag) {
+      fitWindow();
+      var worker = new Worker('dist/worker.js');
+      worker.addEventListener('message', function (e) {
+        console.log('Worker said: ', e.data);
+        playURL(e.data, tag);
+      }, false);
+
+      var files = document.getElementById(id).files;
+      console.log('msg: ', files);
+      worker.postMessage(files);
+    }
+
+    function playFile(id, tag) {
+      var file = document.getElementById(id).files[0];
+      if (!file) {
+        return;
+      }
+      fitWindow();
+      var index = file.name.lastIndexOf(".");
+      var ext = file.name.substr(index + 1);
+      console.log(file.name, ext);
+      if (ext === 'ivf' || videoonly) {
+        playIVF(id, tag);
+      } else {
+        var url = URL.createObjectURL(file);
+        playURL(url, tag);
+      }
+    }
+    function playV(v1) {
+      v1.play();
+    }
+    function pauseV(v1) {
+      v1.pause();
+    }
+    
+    function seekedV(src, tgt) {
+      tgt.currentTime = src.currentTime;
+    }
+    function playPause(v1, v2) {
+      if (v1.paused) {
+        v2.currentTime = v1.currentTime;
+        v1.play();
+        v2.play();
+      }
+      else {
+        v1.pause();
+        v2.pause();
+        v2.currentTime = v1.currentTime;
+      }
+    }
+
+    function stop(v1, v2) {
+      v1.pause();
+      v2.pause();
+      v1.currentTime = 0;
+      v2.currentTime = 0;
+    }
+
+	  function rotate(v1, v2) {
+      
+    }
+    function load(v1, v2) {
+      v1.load();
+      v2.load();
+    }
+
+    function setTime(v1, v2, time_value) {
+      time = document.getElementById(time_value).value
+      v1.currentTime = time;
+      v2.currentTime = time;
+    }
+
+    function makeRes(v1, v2, width) {
+      v1.width = width;
+      v2.width = width;
+    }
+    
+    function fitWindow() {
+      videoContainer.style.width = "100%"
+    }
+    
+    function makeResA() {
+      videoContainer.style.width = videoRatio.video3
+    }
+    function makeResB() {
+      videoContainer.style.width = videoRatio.video4
+    }
+
+    function setRes(v1, v2) {
+      resolution = document.getElementById("player_value").value
+      v1.width = resolution;
+      v2.width = resolution;
+    }
+
+    function getQueryVariable(variable){
+      var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i=0;i<vars.length;i++) {
+             var pair = vars[i].split("=");
+             if(pair[0] == variable){return pair[1];}
+      }
+      return false;
+    }
+    // mode=sbs/slide
+    var mode = getQueryVariable("mode");
+    var videoonly = getQueryVariable("videoonly");
+    
+    var tagA, tagB
+    if (mode == "sbs") {
+      document.getElementsByClassName('tablinks')[0].click()
+      tagA = "video1"
+      tagB = "video2"
+    } else {
+      document.getElementsByClassName('tablinks')[1].click()
+      tagA = "video3"
+      tagB = "video4"
+    }
+    var videoA = getQueryVariable("VideoA");
+    if (videoA) {
+      playURL(videoA, tagA);
+    }
+    var videoB = getQueryVariable("VideoB");
+    if (videoB) {
+      playURL(videoB, tagB);
+    }
+
+  </script>
+
+</body>
+
+</html>
